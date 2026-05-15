@@ -1,27 +1,30 @@
-const all = document.getElementById("all");
-
 
 const BASE_URL = "https://pokeapi.co/api/v2/";
+const resultDisplay = document.getElementById("resultsDisplay");
 
 
 async function fetchPokemon() {
 
+    const imgElement = document.getElementById("pokemonSprite");
+    const pokemonName = document.getElementById("pokemonName").value.trim().toLowerCase();
+
+    if(!pokemonName) return;
+
     try {
-        const pokemonName = document.getElementById("pokemonName").value.toLowerCase();
-        const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonName}`);
+        const response = await fetch(`${BASE_URL}pokemon${pokemonName}`);
 
         if(!response.ok) {
             throw new Error("could not fetch data");
         }
 
         const data = await response.json();
-        const pokemonSprite = data.sprites.front_default;
-        const imgElement = document.getElementById("pokemonSprite");
-
-        imgElement.src = pokemonSprite;
+        imgElement.src = data.sprites.front_default;
         imgElement.style.display = "block";
+        resultDisplay.innerHTML = `<p><strong> ${data.name.toUpperCase()}<p>`;
     } 
     catch (error) {
-        console.log(error)
+        console.error(error);
+        resultDisplay.innerHTML = `<p style="color: red;"> Pokemon not found <p>`;
+        imgElement.style.display = "none";
     }
 }
