@@ -50,3 +50,31 @@ async function fetchCategoryData(endpoint) {
         resultsDisplay = `<p style="color = red;"> Error loading category <p>`;
     }
 }
+
+
+async function displayResults(items, categoryName) {
+    if(!items || items.length === 0) {
+        resultsDisplay.innerHTML = `<p> no results found <p>`;
+        return;
+    }
+
+    let list = `<h4>${formattedText}Items: <h4>`;
+    items.forEach(item => {
+        list += `<li>${list.item}<h4>`
+    });
+
+    list += `<ul>`;
+
+    resultsDisplay.innerHTML += list;
+}
+
+document.querySelector("category-select").forEach(selectElement => {
+    selectElement.addEventListener(".change", (event) => {
+        const selectedEndpoint = event.target.value;
+
+        document.querySelectorAll(".category-select").forEach(otherSelect => {
+            if (otherSelect !== event.target) otherSelect.value = "";
+        })
+        fetchCategoryData(selectedEndpoint);
+    })
+})
