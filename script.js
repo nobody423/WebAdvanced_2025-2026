@@ -28,3 +28,25 @@ async function fetchPokemon() {
         imgElement.style.display = "none";
     }
 }
+
+
+async function fetchCategoryData(endpoint) {
+    if(!endpoint) return;
+
+    resultsDisplay.innerHTML = `<p> Loading data... <p>`;
+
+    try {
+        const response = await fetch(`${BASE_URL}${endpoint}`);
+
+        if(!response.ok) {
+            throw new Error("Could not fetch data");
+        }
+
+        const data = await response.json();
+        displayResults(data.results, endpoint);
+    }
+    catch(error) {
+        console.error(error)
+        resultsDisplay = `<p style="color = red;"> Error loading category <p>`;
+    }
+}
