@@ -14,88 +14,59 @@
       
     <section class="search-panel">
     <h1>Pokedex</h1>
+    <button id="switch-theme">🌓 Switch Theme</button>
 
     <button id="all">See all</button>
-    <br>
 
     
     <div id="searchBar">
       <p>Search Pokemon</p>
       <input type="text" id="pokemonName" placeholder="Enter pokemon name">
       <button id="searchBtn" onclick="fetchPokemon()">Search</button><br>
-
-      <img src="" alt="Pokemon Sprite" id="pokemonSprite" style="display: none">
     </div>
 
     </section>
 
-    <div class="filters">
+    <section class="control-panel">
 
-    <p>Browse by category: </p>
-    <ul>
-
-      <label for="berries" id="berries">Berries</label>
-      <select name="berries" id="berries">
-        <option value="">--select--</option>
-        <option value="berries">berries</option>
-        <option value="berry firmnesses">berry firmnesses</option>
-        <option value="berry flavors">berry flavors</option>
+      <select id="typeFilter">
+        <option value="">All types</option>
+        <option value="fire">Fire</option>
+        <option value="water">Water</option>
+        <option value="grass">Grass</option>
       </select>
 
-      <label for="contests">Contests</label>
-      <select name="contests" id="contests">
-        <option value="">--select--</option>
-        <option value="contest types">contest types</option>
-        <option value="contest effects">contest effects</option>
-        <option value="super contest effects">super contest effects</option>
+      <select id="statSorter">
+        <option value="">Sort by...</option>
+        <option value="id-asc">ID</option>
+        <option value="name-asc">Name</option>
+        <option value="weight-desc">Weight</option>
       </select>
 
+      <button id="random">Random</button>
+    </section>
 
-      <label for="encounters">Encounters</label>
-      <select name="encounters" id="encounters">
-        <option value="">--select--</option>
-        <option value="encounter methods">encounter methods</option>
-        <option value="encounter conditions">encounter conditions</option>
-        <option value="encounter condition values">encounter condition values</option>
-      </select>
 
-      <label for="evolution">Evolution</label>
-      <select name="evolution" id="evolution">
-        <option value="">--select--</option>
-        <option value="Evolution chains">Evolution chains</option>
-        <option value="Evolution triggers">Evolution triggers</option>
-      </select>
+    <main>
+      <table id="pokemon-table">
+        <thead>
+          <tr>
+            <h>Sprite</h>
+            <h>ID</h>
+            <h>Name</h>
+            <h>Types</h>
+            <h>Height</h>
+            <h>Weight</h>
+            <h>Actions</h>
+          </tr>
+        </thead>
+        <tbody id="table-body">
 
-      <label for="games">Games</label>
-      <select name="games" id="games">
-        <option value="">--select--</option>
-        <option value="Generations">Generations</option>
-        <option value="Pokedexes">Pokedexes</option>
-        <option value="Version">Version</option>
-        <option value="Version groups">Version groups</option>
-      </select>
+        </tbody>
+      </table>
+      <div id="infinite-scroll"></div>
+    </main>
 
-      <label for="items">Items</label>
-      <select name="item" id="item">
-        <option value="">--select--</option>
-        <option value="Item">Item</option>
-        <option value="Item attributes">Item attributes</option>
-        <option value="Item categories">Item categories</option>
-        <option value="Item fling effects">Item fling effects</option>
-        <option value="Item pockets">Item pockets</option>
-      </select>
-
-      <label for="locations">Locations</labels>
-        <select name="Locations" id="Locations">
-          <option value="">--select--</option>
-          <option value="Locations">Locations</option>
-          <option value="Location areas">Location areas</option>
-          <option value="Pal park areas">Pal park areas</option>
-          <option value="Regions">Regions</option>
-        </select>
-
-    </ul>
-    </div>
 
     <h3>Results:</h3>
     <div id="resultsDisplay"></div>
