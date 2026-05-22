@@ -16,25 +16,36 @@
     <h1>Pokedex</h1>
     <button id="switch-theme">🌓 Switch Theme</button>
 
-    <button id="all">See all</button>
+    <button id="allBtn">See all</button>
+    <br><br>
 
     
-    <div id="searchBar">
+    <form id="searchForm">
       <p>Search Pokemon</p>
       <input type="text" id="pokemonName" placeholder="Enter pokemon name">
-      <button id="searchBtn" onclick="fetchPokemon()">Search</button><br>
+      <button type="submit" id="searchBtn" onclick="fetchPokemon()">Search</button>
+      <span id="validation-message" style="color: red; display: block; margin-top: 5px"></span>
+    </form>
+
+    <div id="singleResult">
+      <img src="" alt="Pokemon Sprite" id="pokemonSprite">
+      <div id="singleResultDisplay"></div>
+      <button id="addFavorite">Add to Favourites</button>
     </div>
 
     </section>
 
     <section class="control-panel">
 
+      <label for="typeFilter"></label>
       <select id="typeFilter">
         <option value="">All types</option>
         <option value="fire">Fire</option>
         <option value="water">Water</option>
         <option value="grass">Grass</option>
+        <option value="electric">Electric</option>
       </select>
+      
 
       <select id="statSorter">
         <option value="">Sort by...</option>
@@ -64,19 +75,21 @@
 
         </tbody>
       </table>
+      <div id="loadingIndicator"></div>
       <div id="infinite-scroll"></div>
     </main>
+
 
 
     <h3>Results:</h3>
     <div id="resultsDisplay"></div>
 
-    <div class="favourites">
+    <aside class="favourites">
       <h3>My favourites</h3>
       <div id="favourites-list">
         <p class="fav-empty">No favourites saved</p>
       </div>
-    </div>
+    </aside>
 
     </div>
     
