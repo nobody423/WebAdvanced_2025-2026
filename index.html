@@ -11,23 +11,30 @@
   <body>
     <div id="app">
 
+      
+    <section class="search-panel">
     <h1>Pokedex</h1>
 
     <button id="all">See all</button>
     <br>
 
-    <p>Search Pokemon</p>
-    <input type="text" id="pokemonName" placeholder="Enter pokemon name">
-    <button onclick="fetchPokemon()">Search</button><br>
+    
+    <div id="searchBar">
+      <p>Search Pokemon</p>
+      <input type="text" id="pokemonName" placeholder="Enter pokemon name">
+      <button id="searchBtn" onclick="fetchPokemon()">Search</button><br>
 
-    <img src="" alt="Pokemon Sprite" id="pokemonSprite" style="display: none">
+      <img src="" alt="Pokemon Sprite" id="pokemonSprite" style="display: none">
+    </div>
+
+    </section>
 
     <div class="filters">
 
     <p>Browse by category: </p>
     <ul>
 
-      <label for="berries" onclick="fetchData()" id="berries">Berries</label>
+      <label for="berries" id="berries">Berries</label>
       <select name="berries" id="berries">
         <option value="">--select--</option>
         <option value="berries">berries</option>
