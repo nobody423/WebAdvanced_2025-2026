@@ -2,6 +2,8 @@
 const BASE_URL = "https://pokeapi.co/api/v2/";
 let favourites = JSON.parse(localStorage.getItem("favourites"));
 const resultDisplay = document.getElementById("resultsDisplay");
+const searchForm = document.getElementById("search-form");
+const validationMessage = document.getElementById("validaton-message");
 
 let allPokemon = [];
 let filteredPokemon = [];
@@ -130,6 +132,44 @@ function displayTable(pokemonList) {
     });
 }
 
+searchForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const input = document.getElementById("pokemonName").value.trim();
+    const isValid = validateSearch(input);
+
+    if(isValid) {
+        validationMessage.textContent = "";
+        applySearch(input);
+    }
+});
+
+const validateSearch = (input) => {
+    if(input === "") {
+        showError("Enter a name");
+        return false;
+    }
+
+    if(input.length < 2) {
+        showError("Name is too short");
+        return false;
+    }
+
+    const onlyLetters = /^[a-zA-Z\-]+$/.test(input);
+    if(!onlyLetters) {
+        showError("Only use letters")
+        return false;
+    }
+
+    return true;
+}
+
+function showError(message) {
+    validationMessage.textContent = message;
+    validationMessage.style.color = "red";
+}
+
+
 
 async function fetchPokemon() {
 
@@ -212,7 +252,13 @@ document.querySelector("category-select").forEach(selectElement => {
 
 
 document.getElementById("pokemonName").addEventListener("input", (e) => {
-    applySearch(e.target.value);
+    const value = e.target.value.trim();
+
+    if(value.length > 0) {
+        validationMessage.textContent = "";
+    }
+
+    applySearch(value);
 })
 
 document.getElementById("typeFilter").addEventListener("change", (e) => {
@@ -222,6 +268,7 @@ document.getElementById("typeFilter").addEventListener("change", (e) => {
 document.getElementById("statSorter").addEventListener("change", (e) => {
     applySort(e.target.value);
 })
+
 
 
 fetchAllPokemon();
