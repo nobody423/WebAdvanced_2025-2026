@@ -1,5 +1,6 @@
 
 const BASE_URL = "https://pokeapi.co/api/v2/";
+let favourites = JSON.parse(localStorage.getItem("favourites"));
 const resultDisplay = document.getElementById("resultsDisplay");
 
 let allPokemon = [];
@@ -61,9 +62,42 @@ function applySort(value) {
 }
 
 
-function displayTable(pokemonTable) {
+const toggleFavourites = (pokemon) => {
+    const alreadySaved = favourites.some(fav => fav.id === pokemon.id);
+
+    if(alreadySaved) {
+        favourites = favourites.filter(fav => fav.id !== pokemon.id)
+    } else {
+        favourites.push(pokemon)
+    }
+
+    localStorage.setItem("favourites", JSON.stringyfy(favourites));
+    renderFavourites();
+    displayTable(filteredPokemon);
+}
+
+const renderFavourites = () => {
+    const list = document.getElementById("favourites-list");
+
+    if(list.length === 0) {
+        list.innerHTML = `<p class="favourites-empty">No favourites saved</p>`;
+        return;
+    }
+
+    list.INNERHTML = favourites.map(pokemon => `
+        <div class="fav-item">
+            <img src="${pokemon.sprites.front_default} alt="${pokemon.name}" width="40">
+            <span>${pokemon.name}</span>
+            <button onclick="toggleFavourite(${JSON.stringify(pokemon).replace(/"/g, 'quot')}">Remove</button>
+        </div>
+        `).join("");
+}
+
+
+function displayTable(pokemonList) {
     document.getElementById("pokemon-table").style.display = "block";
     document.getElementById("table-body").innerHTML = "";
+    const isFavourite = favourites.some(fav => fav.id === pokemon.id);
 
     pokemonList.forEach(pokemon => {
         const types = pokemon.types.map(t => t.type.name).join(", ");
@@ -77,11 +111,23 @@ function displayTable(pokemonTable) {
             <td>${types}</td>
             <td>${pokemon.height}</td>
             <td>${pokemon.weight}</td>
-            <td><button>Add to Favourites</button></td>
+            <td>
+                <button class="fav-btn" data-id="${data.id}">
+                    ${isFavourites ? "Remove from favourites" : "Favourite"}
+                </button>
+            </td>
         </tr>
         `;
         document.getElementById("table-body").innerHTML += row;
-    })
+    });
+
+    document.querySelectorAll(".fav-btn").forEach(button => {
+        button.addEventListener("click", (e) => {
+            const id = parseInt(e.target.dataset.id);
+            const pokemon = allPokemon.find(p => p.id === id);
+            toggleFavourites(pokemon);
+        });
+    });
 }
 
 
@@ -165,5 +211,18 @@ document.querySelector("category-select").forEach(selectElement => {
 })
 
 
+document.getElementById("pokemonName").addEventListener("input", (e) => {
+    applySearch(e.target.value);
+})
+
+document.getElementById("typeFilter").addEventListener("change", (e) => {
+    applyFilter(e.target.value);
+})
+
+document.getElementById("statSorter").addEventListener("change", (e) => {
+    applySort(e.target.value);
+})
+
 
 fetchAllPokemon();
+renderFavourites();
