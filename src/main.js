@@ -2,6 +2,9 @@
 const BASE_URL = "https://pokeapi.co/api/v2/";
 const resultDisplay = document.getElementById("resultsDisplay");
 
+let allPokemon = [];
+let filteredPokemon = [];
+
 async function fetchAllPokemon() {
 
     try {
@@ -25,6 +28,36 @@ async function fetchPokemonDetail(url) {
     const response = await fetch(url);
     const data = await response.json();
     return data;
+}
+
+function applySearch(searchTerm) {
+    filteredPokemon = allPokemon.filter(pokemon => {
+        pokemon.name.includes(searchTerm.toLowerCase());
+    })
+    displayTable(filteredPokemon);
+}
+
+function applyFilter(type) {
+    filteredPokemon = allPokemon.filter(pokemon => {
+        if(type === "") return true;
+        return pokemon.type.some(t => t.type.name === type);
+    })
+    displayTable(filteredPokemon);
+}
+
+function applySort(value) {
+    const sorted = [sortedPokemon];
+
+
+    if(value === "id-asc") {
+        sorted.sort((a, b) => a.id, b.id)
+    } else if(value === "height-asc") {
+        sorted.sort((a, b) => a.name.localeCompare(b.name))
+    }else if(value === "weight-asc") {
+        sorted.sort((a, b) => a.weight, b.weight)
+    }
+
+    displayTable(sorted);
 }
 
 
@@ -77,6 +110,9 @@ async function fetchPokemon() {
         imgElement.style.display = "none";
     }
 }
+
+
+
 
 
 async function fetchCategoryData(endpoint) {
