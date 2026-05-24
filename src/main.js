@@ -1,63 +1,93 @@
 
 const BASE_URL = "https://pokeapi.co/api/v2/";
-let favourites = JSON.parse(localStorage.getItem("favourites"));
+let favourites = JSON.parse(localStorage.getItem("favourites")) ?? [];
 const resultDisplay = document.getElementById("resultsDisplay");
 const searchForm = document.getElementById("search-form");
-const validationMessage = document.getElementById("validaton-message");
+const validationMessage = document.getElementById("validation-message");
 
 let allPokemon = [];
 let filteredPokemon = [];
+let currentOffset = 0;
+const LIMIT = 20;
+let isLoading = false;
 
 async function fetchAllPokemon() {
 
+    if(isLoading) return;
+    isLoading = true;
+
+    document.getElementById("loadingIndicator").textContent = "Loading...";
+
+
     try {
-        const response = await fetch(`${BASE_URL}\pokemon?limit=20`);
-
-        if(!response.ok) {
-            throw new Error("Could not find pokemon");
-        }
-
+        const response = await fetch(`${BASE_URL}pokemon?limit=${LIMIT}&offset=${currentOffset}`);
         const data = await response.json();
+
+
         const detailPromises = data.results.map(pokemon => fetchPokemonDetail(pokemon.url));
-        const pokemonAll = await Promise.all(detailPromises);
+        const newPokemon = await Promise.all(detailPromises);
+
+        allPokemon = [...allPokemon, ...newPokemon];
+        filteredPokemon = allPokemon;
+        currentOffset += LIMIT;
         displayTable(allPokemon);
     }
     catch(error) {
         console.error(error)
     }
+    finally {
+        isLoading = false;
+        document.getElementById("loadingIndicator").textContent = "";
+    }
 }
 
-async function fetchPokemonDetail(url) {
+function setUpInfiniteScroll() {
+    const sentinel = document.getElementById("infinite-scroll");
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if(entry.isIntersecting) {
+                fetchAllPokemon(currentOffset);
+            }
+        });
+    }, {
+        threshold : 1.0
+    });
+    observer.observe(sentinel);
+}
+
+
+const fetchPokemonDetail = async (url) => {
     const response = await fetch(url);
     const data = await response.json();
     return data;
 }
 
 function applySearch(searchTerm) {
-    filteredPokemon = allPokemon.filter(pokemon => {
-        pokemon.name.includes(searchTerm.toLowerCase());
-    })
+    filteredPokemon = allPokemon.filter(pokemon =>
+    pokemon.name.includes(searchTerm.toLowerCase())
+    )
     displayTable(filteredPokemon);
 }
 
 function applyFilter(type) {
     filteredPokemon = allPokemon.filter(pokemon => {
         if(type === "") return true;
-        return pokemon.type.some(t => t.type.name === type);
+        return pokemon.types.some(t => t.type.name === type);
     })
     displayTable(filteredPokemon);
 }
 
 function applySort(value) {
-    const sorted = [sortedPokemon];
+    const sorted = [...filteredPokemon];
 
 
     if(value === "id-asc") {
-        sorted.sort((a, b) => a.id, b.id)
+        sorted.sort((a, b) => a.id - b.id)
     } else if(value === "height-asc") {
-        sorted.sort((a, b) => a.name.localeCompare(b.name))
+        sorted.sort((a, b) => a.height - b.height)
     }else if(value === "weight-asc") {
-        sorted.sort((a, b) => a.weight, b.weight)
+        sorted.sort((a, b) => a.weight - b.weight)
     }
 
     displayTable(sorted);
@@ -73,7 +103,7 @@ const toggleFavourites = (pokemon) => {
         favourites.push(pokemon)
     }
 
-    localStorage.setItem("favourites", JSON.stringyfy(favourites));
+    localStorage.setItem("favourites", JSON.stringify(favourites));
     renderFavourites();
     displayTable(filteredPokemon);
 }
@@ -81,16 +111,16 @@ const toggleFavourites = (pokemon) => {
 const renderFavourites = () => {
     const list = document.getElementById("favourites-list");
 
-    if(list.length === 0) {
+    if(favourites.length === 0) {
         list.innerHTML = `<p class="favourites-empty">No favourites saved</p>`;
         return;
     }
 
-    list.INNERHTML = favourites.map(pokemon => `
+    list.innerHTML = favourites.map(pokemon => `
         <div class="fav-item">
-            <img src="${pokemon.sprites.front_default} alt="${pokemon.name}" width="40">
+            <img src="${pokemon.sprites.front_default}" alt="${pokemon.name}" width="40">
             <span>${pokemon.name}</span>
-            <button onclick="toggleFavourite(${JSON.stringify(pokemon).replace(/"/g, 'quot')}">Remove</button>
+            <button onclick="toggleFavourites(${JSON.stringify(pokemon).replace(/"/g, '&quot;')})">Remove</button>
         </div>
         `).join("");
 }
@@ -99,23 +129,41 @@ const renderFavourites = () => {
 function displayTable(pokemonList) {
     document.getElementById("pokemon-table").style.display = "block";
     document.getElementById("table-body").innerHTML = "";
-    const isFavourite = favourites.some(fav => fav.id === pokemon.id);
 
     pokemonList.forEach(pokemon => {
-        const types = pokemon.types.map(t => t.type.name).join(", ");
+
+        const isFavourite = favourites.some(fav => fav.id === pokemon.id);
+
+        const typeColors = {
+            fire: "ff6b35",
+            water: "4fc3f7",
+            grass: "81c784",
+            electric: "fff176",
+        }
+
+        const types = pokemon.types.map(t => {
+            const color = typeColors[t.type.name] ?? "e0e0e0";
+
+            return `<span style="background: #${color}; padding: 2px 6px; border-radius: 4px;">
+                        ${t.type.name}
+                    </span>`
+        }).join("");
+
+        const allText = pokemon.name ? pokemon.name : "unknown";
+
         const sprite = pokemon.sprites.front_default;
 
         const row = `
         <tr>
-            <td><img src=${sprite}" alt="${pokemon-sprite}" width="48"></td>
+            <td><img src="${sprite}" alt="${pokemon.name}" width="48"></td>
             <td>${pokemon.id}</td>
             <td>${pokemon.name}</td>
             <td>${types}</td>
             <td>${pokemon.height}</td>
             <td>${pokemon.weight}</td>
             <td>
-                <button class="fav-btn" data-id="${data.id}">
-                    ${isFavourites ? "Remove from favourites" : "Favourite"}
+                <button class="fav-btn" data-id="${pokemon.id}">
+                    ${isFavourite ? "Remove from favourites" : "Favourite"}
                 </button>
             </td>
         </tr>
@@ -164,7 +212,7 @@ const validateSearch = (input) => {
     return true;
 }
 
-function showError(message) {
+const showError = (message) => {
     validationMessage.textContent = message;
     validationMessage.style.color = "red";
 }
@@ -188,7 +236,7 @@ async function fetchPokemon() {
         const data = await response.json();
         imgElement.src = data.sprites.front_default;
         imgElement.style.display = "block";
-        resultDisplay.innerHTML = `<p><strong> ${data.name.toUpperCase()}<p>`;
+        resultDisplay.innerHTML = `<p><strong> ${data.name.toUpperCase()}</strong><p>`;
     } 
     catch (error) {
         console.error(error);
@@ -196,59 +244,6 @@ async function fetchPokemon() {
         imgElement.style.display = "none";
     }
 }
-
-
-
-
-
-async function fetchCategoryData(endpoint) {
-    if(!endpoint) return;
-
-    resultsDisplay.innerHTML = `<p> Loading data... <p>`;
-
-    try {
-        const response = await fetch(`${BASE_URL}${endpoint}`);
-
-        if(!response.ok) {
-            throw new Error("Could not fetch data");
-        }
-
-        const data = await response.json();
-        displayResults(data.results, endpoint);
-    }
-    catch(error) {
-        console.error(error)
-        resultsDisplay = `<p style="color = red;"> Error loading category <p>`;
-    }
-}
-
-
-async function displayResults(items, categoryName) {
-    if(!items || items.length === 0) {
-        resultsDisplay.innerHTML = `<p> no results found <p>`;
-        return;
-    }
-
-    let list = `<h4>${formattedText}Items: <h4>`;
-    items.forEach(item => {
-        list += `<li>${list.item}<h4>`
-    });
-
-    list += `<ul>`;
-
-    resultsDisplay.innerHTML += list;
-}
-
-document.querySelector("category-select").forEach(selectElement => {
-    selectElement.addEventListener(".change", (event) => {
-        const selectedEndpoint = event.target.value;
-
-        document.querySelectorAll(".category-select").forEach(otherSelect => {
-            if (otherSelect !== event.target) otherSelect.value = "";
-        })
-        fetchCategoryData(selectedEndpoint);
-    })
-})
 
 
 document.getElementById("pokemonName").addEventListener("input", (e) => {
@@ -269,7 +264,18 @@ document.getElementById("statSorter").addEventListener("change", (e) => {
     applySort(e.target.value);
 })
 
+searchForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const input = document.getElementById("pokemonName").value.trim();
+    const isValid = validateSearch(input);
+    if(isValid) {
+        validationMessage.textContent = "";
+        fetchPokemon();
+    }
+});
 
 
-fetchAllPokemon();
+
+fetchAllPokemon(0);
 renderFavourites();
+setUpInfiniteScroll();
